@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modern Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #000;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .calculator {
+      background: #111;
+      padding: 25px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      width: 340px;
+    }
+
+    .display {
+      background: #000;
+      padding: 15px 20px;
+      border-radius: 12px;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      border: 1px solid #ffffff33;
+      height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .expression {
+      color: #00ffcc;
+      font-size: 1.4rem;
+      word-break: break-all;
+    }
+
+    .live-result {
+      font-size: 1rem;
+      color: #999;
+      margin-top: 6px;
+      word-break: break-word;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    button {
+      padding: 20px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 12px;
+      background: #1a1a1a;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #2a2a2a;
+    }
+
+    button.operator {
+      background: #7c3aed;
+    }
+
+    button.operator:hover {
+      background: #8b5cf6;
+    }
+
+    button.equal {
+      background: #10b981;
+      grid-column: span 2;
+    }
+
+    button.clear {
+      background: #ef4444;
+    }
+
+    button.back {
+      background: #f59e0b;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="display">
+      <span class="expression" id="display">0</span>
+      <span class="live-result" id="liveResult"></span>
+    </div>
+    <div class="buttons">
+      <button class="clear" onclick="clearDisplay()">C</button>
+      <button class="back" onclick="backspace()">←</button>
+      <button class="operator" onclick="appendOperator('/')">÷</button>
+      <button class="operator" onclick="appendOperator('*')">×</button>
+
+      <button onclick="appendNumber('7')">7</button>
+      <button onclick="appendNumber('8')">8</button>
+      <button onclick="appendNumber('9')">9</button>
+      <button class="operator" onclick="appendOperator('-')">−</button>
+
+      <button onclick="appendNumber('4')">4</button>
+      <button onclick="appendNumber('5')">5</button>
+      <button onclick="appendNumber('6')">6</button>
+      <button class="operator" onclick="appendOperator('+')">+</button>
+
+      <button onclick="appendNumber('1')">1</button>
+      <button onclick="appendNumber('2')">2</button>
+      <button onclick="appendNumber('3')">3</button>
+      <button onclick="appendDecimal()">.</button>
+
+      <button onclick="percentage()">%</button>
+      <button onclick="appendNumber('0')">0</button>
+      <button class="equal" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById("display");
+    const liveResult = document.getElementById("liveResult");
+
+    function updateLiveResult() {
+      try {
+        const expression = display.textContent;
+        if (!expression || /[\+\-\*\/\.]$/.test(expression)) {
+          liveResult.textContent = "";
+          return;
+        }
+        const result = eval(expression);
+        if (!isNaN(result)) {
+          liveResult.textContent = `= ${result}`;
+        } else {
+          liveResult.textContent = "";
+        }
+      } catch {
+        liveResult.textContent = "";
+      }
+    }
+
+    function appendNumber(number) {
+      if (display.textContent === "0" || display.textContent === "Error") {
+        display.textContent = number;
+      } else {
+        display.textContent += number;
+      }
+      updateLiveResult();
+    }
+
+    function appendOperator(operator) {
+      const lastChar = display.textContent.slice(-1);
+      if ("+-*/".includes(lastChar)) {
+        display.textContent = display.textContent.slice(0, -1) + operator;
+      } else {
+        display.textContent += operator;
+      }
+      updateLiveResult();
+    }
+
+    function appendDecimal() {
+      const parts = display.textContent.split(/[\+\-\*\/]/);
+      const lastPart = parts[parts.length - 1];
+      if (!lastPart.includes(".")) {
+        display.textContent += ".";
+      }
+      updateLiveResult();
+    }
+
+    function clearDisplay() {
+      display.textContent = "0";
+      liveResult.textContent = "";
+    }
+
+    function backspace() {
+      if (display.textContent.length === 1 || display.textContent === "Error") {
+        display.textContent = "0";
+      } else {
+        display.textContent = display.textContent.slice(0, -1);
+      }
+      updateLiveResult();
+    }
+
+    function calculate() {
+      try {
+        const result = eval(display.textContent);
+        display.textContent = result;
+        liveResult.textContent = "";
+      } catch {
+        display.textContent = "Error";
+        liveResult.textContent = "";
+      }
+    }
+
+    function percentage() {
+      try {
+        const expression = display.textContent;
+        const value = eval(expression);
+        if (!isNaN(value)) {
+          const percentValue = value / 100;
+          display.textContent = percentValue.toString();
+          liveResult.textContent = "";
+        }
+      } catch {
+        display.textContent = "Error";
+        liveResult.textContent = "";
+      }
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (!isNaN(e.key)) {
+        appendNumber(e.key);
+      } else if (["+", "-", "*", "/"].includes(e.key)) {
+        appendOperator(e.key);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        calculate();
+      } else if (e.key === "Backspace") {
+        backspace();
+      } else if (e.key === "Escape") {
+        clearDisplay();
+      } else if (e.key === ".") {
+        appendDecimal();
+      } else if (e.key === "%") {
+        percentage();
+      }
+    });
+  </script>
+</body>
+</html>
